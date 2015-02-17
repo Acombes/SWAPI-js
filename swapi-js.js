@@ -55,8 +55,9 @@
 
     Swapi.prototype = {
         get: function(url, success, error) {
-            error = error || function() {console.error(this.error);};
-            url = url || this.baseUrl;
+            var self = this;
+            error = error || function() {console.error(self.error);};
+            url = url || self.baseUrl;
 
             var req = new XMLHttpRequest();
             req.open('GET', url, true);
@@ -65,10 +66,8 @@
                 if(this.readyState != XMLHttpRequest.DONE) return;
 
                 if(this.status != 200) {
-                    error(this.error);
-                } else {
-                    if(success) success(JSON.parse(this.responseText));
-                }
+                    error.call(self, this.error);
+                } else if(success) success.call(self, JSON.parse(this.responseText));
             };
 
             req.send();
