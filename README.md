@@ -35,3 +35,7 @@ For each key word exposed in the API's description, your intance will have 3 met
   All `error` arguments are error callbacks and are optional.
 
 It is possible to handle several APIs at once, they will be completely independant of one another.
+
+
+# Evolution
+Using ES6's promises could be a blast
