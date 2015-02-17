@@ -16,34 +16,42 @@
 
         /** Get the root description and create the methods from the api's returned schema */
         self.get(baseUrl, function (data) {
-            for(var key in data) {
-                (function () {
-                    var theKey = key,
-                        capitalKey = capitalise(theKey);
-                    self['getPage' + capitalKey] = function (page, callback, error) {
-                        self.get(data[theKey] + '?page=' + page, callback, error);
-                    };
+            function initOneKey(key) {
+                var capitalKey = capitalise(key);
 
-                    self['getAll' + capitalKey] = function(callback, error) {
-                        var results = [];
+                // Define the getAll[Key] method
+                self['getAll' + capitalKey] = function(page, callback, error) {
+                    /* If page is actually a function, that means we don't want a page, but really all results.
+                     * If page is a number or a string , then we only fetch the page */
+                    if(typeof page === 'function') {
+                        error = callback;
+                        callback = page;
 
-                        function recursive(data) {
-                            results = results.concat(data.results);
+                        var results = [],
+                            recursive = function(data) {
+                                results = results.concat(data.results);
 
-                            if(data.next != null) {
-                                self.get(data.next, recursive, error);
-                            } else {
-                                callback(results);
-                            }
-                        }
+                                if(data.next !== null) {
+                                    self.get(data.next, recursive, error);
+                                } else {
+                                    callback(results);
+                                }
+                            };
 
-                        self.get(data[theKey], recursive, error);
-                    };
-
-                    self['get' + capitalKey] = function (id, callback, error) {
-                        self.get(data[theKey] + id, callback, error);
+                        self.get(data[key], recursive, error);
+                    } else if(page && /[0-9]+/.test(page)) {
+                        self.get(data[key] + '?page=' + page, callback, error);
                     }
-                })();
+                };
+
+                // Define the get[Key] method.
+                self['get' + capitalKey] = function (id, callback, error) {
+                    self.get(data[key] + id, callback, error);
+                };
+            }
+
+            for(var key in data) {
+                initOneKey(key);
             }
 
             var event = document.createEvent('Event');
@@ -66,7 +74,7 @@
                 if(this.readyState != XMLHttpRequest.DONE) return;
 
                 if(this.status != 200) {
-                    error.call(self, this.error);
+                    error.call(self, url + ' ' + JSON.parse(this.responseText).detail);
                 } else if(success) success.call(self, JSON.parse(this.responseText));
             };
 
@@ -80,7 +88,7 @@
             } else {
                 document.addEventListener(self.baseUrl, function () {
                     callback.call(self);
-                })
+                });
             }
         }
     };
