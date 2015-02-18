@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>Swapi-Js</id>
+        <version>1.0.0</version>
+        <authors>Aurelien Souchet</authors>
+        <owners>Antoine Combes</owners>
+        <projectUrl>https://github.com/Acombes/SWAPI-js</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Library using the Star Wars API by Paul Hallett at http://swapi.co/</description>
+    </metadata>
+    <files>
+        <file src="src/swapi-js.js" target="script" />
+        <file src="src/swapi-js.min.js" target="script" />
+    </files>
+</package>
