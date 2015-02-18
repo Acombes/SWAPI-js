@@ -11,14 +11,18 @@ module.exports = function(grunt) {
         },
         jshint: {
             all: ['src/swapi-js.js']
+        },
+        nugetpack: {
+            dist: {
+                src: 'swapi-js.nuspec',
+                dest: 'nuget/'
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-nuget');
 
-    grunt.registerTask('default', ['jshint','uglify']);
-
-};/**
- * Created by ancom on 17/02/15.
- */
+    grunt.registerTask('default', ['jshint','uglify','nugetpack']);
+};
