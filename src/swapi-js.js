@@ -87,12 +87,12 @@
             if(this.loaded) {
                 callback.call(this);
             } else {
-                if(self.cbQueue.isEmpty()) {
+                if(!self.cbQueue.length) {
                     var executeHandlers = function() {
                         document.removeEventListener(self.baseUrl, executeHandlers);
                         var handler;
 
-                        while(undefined !== (handler = self.cbQueue.pop())) {
+                        while('undefined' !== typeof (handler = self.cbQueue.pop())) {
                             handler.call(self);
                         }
                     };
