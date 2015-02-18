@@ -16,42 +16,41 @@
 
         /** Get the root description and create the methods from the api's returned schema */
         self.get(baseUrl, function (data) {
-            function initOneKey(key) {
-                var capitalKey = capitalise(key);
-
-                // Define the getAll[Key] method
-                self['getAll' + capitalKey] = function(page, callback, error) {
-                    /* If page is actually a function, that means we don't want a page, but really all results.
-                     * If page is a number or a string , then we only fetch the page */
-                    if(typeof page === 'function') {
-                        error = callback;
-                        callback = page;
-
-                        var results = [],
-                            recursive = function(data) {
-                                results = results.concat(data.results);
-
-                                if(data.next !== null) {
-                                    self.get(data.next, recursive, error);
-                                } else {
-                                    callback(results);
-                                }
-                            };
-
-                        self.get(data[key], recursive, error);
-                    } else if(page && /[0-9]+/.test(page)) {
-                        self.get(data[key] + '?page=' + page, callback, error);
-                    }
-                };
-
-                // Define the get[Key] method.
-                self['get' + capitalKey] = function (id, callback, error) {
-                    self.get(data[key] + id, callback, error);
-                };
-            }
-
             for(var key in data) {
-                initOneKey(key);
+                (function(theKey) {
+                    var capitalKey = capitalise(theKey);
+
+                    // Define the getAll[Key] method
+                    self['getAll' + capitalKey] = function(page, callback, error) {
+                        /* If page is actually a function, that means we don't want a page, but really all results. */
+                        if(typeof page === 'function') {
+                            error = callback;
+                            callback = page;
+
+                            var results = [],
+                                recursive = function(data) {
+                                    results = results.concat(data.results);
+
+                                    if(data.next !== null) {
+                                        self.get(data.next, recursive, error);
+                                    } else {
+                                        callback(results);
+                                    }
+                                };
+
+                            self.get(data[theKey], recursive, error);
+
+                        /* If page is a number or a string , then we only fetch the page */
+                        } else if(page && /[0-9]+/.test(page)) {
+                            self.get(data[theKey] + '?page=' + page, callback, error);
+                        }
+                    };
+
+                    // Define the get[Key] method.
+                    self['get' + capitalKey] = function (id, callback, error) {
+                        self.get(data[theKey] + id, callback, error);
+                    };
+                })(key);
             }
 
             var event = document.createEvent('Event');
@@ -61,7 +60,9 @@
         });
     };
 
+    /* Generic methods */
     Swapi.prototype = {
+        cbQueue: [],
         get: function(url, success, error) {
             var self = this;
             error = error || function() {console.error(self.error);};
@@ -86,9 +87,20 @@
             if(this.loaded) {
                 callback.call(this);
             } else {
-                document.addEventListener(self.baseUrl, function () {
-                    callback.call(self);
-                });
+                if(self.cbQueue.isEmpty()) {
+                    var executeHandlers = function() {
+                        document.removeEventListener(self.baseUrl, executeHandlers);
+                        var handler;
+
+                        while(undefined !== (handler = self.cbQueue.pop())) {
+                            handler.call(self);
+                        }
+                    };
+
+                    document.addEventListener(self.baseUrl, executeHandlers);
+                }
+
+                self.cbQueue.push(function(){callback.call(self);});
             }
         }
     };

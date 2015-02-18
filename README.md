@@ -31,7 +31,7 @@ Using this library should be pretty simple as long as the API you want to use ex
 For each key word exposed in the API's description, your intance will have 3 methods available:
   * `get[KeyWord](id, success, error)` : retrieves a single result from the given `id` and passes it to the `success` callback
   * `getAll[KeyWord](success, error)` : retrieves all results and passes them to the `success` callback
-  * `getPage[KeyWord](page, success, error)` : retrieves a single page of results and passes it to the `success` callback
+  * `getAll[KeyWord](page, success, error)` : retrieves a single page of results and passes it to the `success` callback
   All `error` arguments are error callbacks and are optional.
 
 It is possible to handle several APIs at once, they will be completely independant of one another.
